@@ -1,6 +1,329 @@
+
+// "use client"
+
+// import { useEffect, useState } from "react"
+// import { User, Bell, Store } from "lucide-react"
+// import {
+//   Card,
+//   CardContent,
+//   CardHeader,
+//   CardTitle,
+//   CardDescription,
+// } from "@/components/ui/card"
+// import { Button } from "@/components/ui/button"
+// import { Input } from "@/components/ui/input"
+// import { Label } from "@/components/ui/label"
+// import { Badge } from "@/components/ui/badge"
+// import { supabase } from "@/lib/supabase/client"
+// import { toast } from "sonner"
+// import { Loader2 } from "lucide-react"
+
+// interface UserProfile {
+//   id: string
+//   full_name: string
+//   business_name: string
+//   business_type: string
+//   email: string
+// }
+
+// interface NotificationSettings {
+//   expiry_alerts: boolean
+//   surplus_predictions: boolean
+//   low_stock_alerts: boolean
+//   weekly_reports: boolean
+// }
+
+// export default function SettingsPage() {
+//   // const supabase = createClient()
+//   const [loading, setLoading] = useState(true)
+//   const [saving, setSaving] = useState(false)
+//   const [profile, setProfile] = useState<UserProfile>({
+//     id: "",
+//     full_name: "",
+//     business_name: "",
+//     business_type: "",
+//     email: "",
+//   })
+//   const [notifications, setNotifications] = useState<NotificationSettings>({
+//     expiry_alerts: true,
+//     surplus_predictions: true,
+//     low_stock_alerts: true,
+//     weekly_reports: false,
+//   })
+
+//   useEffect(() => {
+//     loadUserData()
+//   }, [])
+
+//   const loadUserData = async () => {
+//     try {
+//       // Get current user
+//       const { data: { user }, error: userError } = await supabase.auth.getUser()
+      
+//       if (userError) throw userError
+//       if (!user) {
+//         toast.error("No user found")
+//         return
+//       }
+
+//       // Get profile data
+//       const { data: profileData, error: profileError } = await supabase
+//         .from('profiles')
+//         .select('*')
+//         .eq('id', user.id)
+//         .single()
+
+//       if (profileError && profileError.code !== 'PGRST116') {
+//         throw profileError
+//       }
+
+//       // Set profile data
+//       setProfile({
+//         id: user.id,
+//         full_name: profileData?.full_name || user.user_metadata?.full_name || "",
+//         business_name: profileData?.business_name || "",
+//         business_type: profileData?.business_type || "",
+//         email: user.email || "",
+//       })
+
+//       // Load notification settings if they exist
+//       const savedNotifications = localStorage.getItem('notification_settings')
+//       if (savedNotifications) {
+//         setNotifications(JSON.parse(savedNotifications))
+//       }
+
+//     } catch (error: any) {
+//       console.error('Error loading user data:', error)
+//       toast.error("Failed to load user data")
+//     } finally {
+//       setLoading(false)
+//     }
+//   }
+
+//   const handleProfileUpdate = async () => {
+//     setSaving(true)
+//     try {
+//       // Update profile in Supabase
+//       const { error } = await supabase
+//         .from('profiles')
+//         .upsert({
+//           id: profile.id,
+//           full_name: profile.full_name,
+//           business_name: profile.business_name,
+//           business_type: profile.business_type,
+//           updated_at: new Date().toISOString(),
+//         })
+
+//       if (error) throw error
+
+//       toast.success("Profile updated successfully!")
+//     } catch (error: any) {
+//       console.error('Error updating profile:', error)
+//       toast.error("Failed to update profile")
+//     } finally {
+//       setSaving(false)
+//     }
+//   }
+
+//   const toggleNotification = (key: keyof NotificationSettings) => {
+//     const newSettings = {
+//       ...notifications,
+//       [key]: !notifications[key],
+//     }
+//     setNotifications(newSettings)
+    
+//     // Save to localStorage
+//     localStorage.setItem('notification_settings', JSON.stringify(newSettings))
+//     toast.success("Notification settings updated")
+//   }
+
+//   if (loading) {
+//     return (
+//       <div className="flex items-center justify-center min-h-[400px]">
+//         <Loader2 className="h-8 w-8 animate-spin text-primary" />
+//       </div>
+//     )
+//   }
+
+//   const notificationItems = [
+//     { 
+//       key: 'expiry_alerts' as keyof NotificationSettings,
+//       label: "Expiry alerts", 
+//       desc: "Get notified before products expire"
+//     },
+//     { 
+//       key: 'surplus_predictions' as keyof NotificationSettings,
+//       label: "Surplus predictions", 
+//       desc: "AI-powered surplus warnings"
+//     },
+//     { 
+//       key: 'low_stock_alerts' as keyof NotificationSettings,
+//       label: "Low stock alerts", 
+//       desc: "When inventory falls below threshold"
+//     },
+//     { 
+//       key: 'weekly_reports' as keyof NotificationSettings,
+//       label: "Weekly reports", 
+//       desc: "Summary email every Monday"
+//     },
+//   ]
+
+//   return (
+//     <div className="flex flex-col gap-6 max-w-3xl">
+//       <div>
+//         <h1 className="text-2xl font-bold tracking-tight text-foreground">Settings</h1>
+//         <p className="text-sm text-muted-foreground">Manage your account and business preferences</p>
+//       </div>
+
+//       {/* Business Profile */}
+//       <Card>
+//         <CardHeader className="pb-4">
+//           <div className="flex items-center gap-3">
+//             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
+//               <Store className="h-4 w-4 text-primary" />
+//             </div>
+//             <div>
+//               <CardTitle className="text-base font-semibold">Business Profile</CardTitle>
+//               <CardDescription>Manage your business information</CardDescription>
+//             </div>
+//           </div>
+//         </CardHeader>
+//         <CardContent className="flex flex-col gap-4">
+//           <div className="flex flex-col gap-2">
+//             <Label htmlFor="business-name">Business name</Label>
+//             <Input 
+//               id="business-name" 
+//               value={profile.business_name}
+//               onChange={(e) => setProfile({ ...profile, business_name: e.target.value })}
+//               placeholder="Enter your business name"
+//             />
+//           </div>
+//           <div className="flex flex-col gap-2">
+//             <Label htmlFor="business-type">Business type</Label>
+//             <Input 
+//               id="business-type" 
+//               value={profile.business_type}
+//               onChange={(e) => setProfile({ ...profile, business_type: e.target.value })}
+//               placeholder="e.g., Bakery, Restaurant, Grocery Store"
+//             />
+//           </div>
+//           <div className="flex justify-end pt-2">
+//             <Button 
+//               size="sm" 
+//               onClick={handleProfileUpdate}
+//               disabled={saving}
+//             >
+//               {saving ? (
+//                 <>
+//                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
+//                   Saving...
+//                 </>
+//               ) : (
+//                 "Save changes"
+//               )}
+//             </Button>
+//           </div>
+//         </CardContent>
+//       </Card>
+
+//       {/* Account */}
+//       <Card>
+//         <CardHeader className="pb-4">
+//           <div className="flex items-center gap-3">
+//             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
+//               <User className="h-4 w-4 text-primary" />
+//             </div>
+//             <div>
+//               <CardTitle className="text-base font-semibold">Account</CardTitle>
+//               <CardDescription>Your personal account details</CardDescription>
+//             </div>
+//           </div>
+//         </CardHeader>
+//         <CardContent className="flex flex-col gap-4">
+//           <div className="flex flex-col gap-2">
+//             <Label htmlFor="full-name">Full name</Label>
+//             <Input 
+//               id="full-name" 
+//               value={profile.full_name}
+//               onChange={(e) => setProfile({ ...profile, full_name: e.target.value })}
+//               placeholder="Enter your full name"
+//             />
+//           </div>
+//           <div className="flex flex-col gap-2">
+//             <Label htmlFor="email">Email</Label>
+//             <Input 
+//               id="email" 
+//               value={profile.email}
+//               disabled
+//               className="bg-muted cursor-not-allowed"
+//             />
+//             <p className="text-xs text-muted-foreground">
+//               Email cannot be changed. Contact support if you need to update it.
+//             </p>
+//           </div>
+//           <div className="flex justify-end pt-2">
+//             <Button 
+//               size="sm" 
+//               onClick={handleProfileUpdate}
+//               disabled={saving}
+//             >
+//               {saving ? (
+//                 <>
+//                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
+//                   Saving...
+//                 </>
+//               ) : (
+//                 "Save changes"
+//               )}
+//             </Button>
+//           </div>
+//         </CardContent>
+//       </Card>
+
+//       {/* Notifications */}
+//       <Card>
+//         <CardHeader className="pb-4">
+//           <div className="flex items-center gap-3">
+//             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent/10">
+//               <Bell className="h-4 w-4 text-accent" />
+//             </div>
+//             <div>
+//               <CardTitle className="text-base font-semibold">Notifications</CardTitle>
+//               <CardDescription>Configure how you receive alerts</CardDescription>
+//             </div>
+//           </div>
+//         </CardHeader>
+//         <CardContent className="flex flex-col gap-3">
+//           {notificationItems.map((item) => (
+//             <button
+//               key={item.key}
+//               onClick={() => toggleNotification(item.key)}
+//               className="flex items-center justify-between rounded-lg border border-border p-3.5 hover:bg-accent/5 transition-colors cursor-pointer"
+//             >
+//               <div className="text-left">
+//                 <p className="text-sm font-medium text-foreground">{item.label}</p>
+//                 <p className="text-xs text-muted-foreground">{item.desc}</p>
+//               </div>
+//               <Badge 
+//                 variant={notifications[item.key] ? "default" : "secondary"} 
+//                 className="text-[10px]"
+//               >
+//                 {notifications[item.key] ? "Active" : "Off"}
+//               </Badge>
+//             </button>
+//           ))}
+//         </CardContent>
+//       </Card>
+//     </div>
+//   )
+// }
+
+
+
 "use client"
 
-import { Settings, User, Bell, Shield, CreditCard, Store } from "lucide-react"
+import { useState } from "react"
+import { Settings, User, Bell, Shield, CreditCard, Store, CheckCircle2 } from "lucide-react"
 import {
   Card,
   CardContent,
@@ -12,30 +335,89 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
+import { Switch } from "@/components/ui/switch"
+import { useAuth } from "@/lib/auth-context"
+import { supabase } from "@/lib/supabase"
 
-const settingSections = [
-  {
-    title: "Business Profile",
-    description: "Manage your business information",
-    icon: Store,
-    fields: [
-      { label: "Business name", value: "Fresh Bakes", id: "biz-name" },
-      { label: "Location", value: "Blantyre, Malawi", id: "location" },
-      { label: "Business type", value: "Bakery", id: "biz-type" },
-    ],
-  },
-  {
-    title: "Account",
-    description: "Your personal account details",
-    icon: User,
-    fields: [
-      { label: "Full name", value: "Carol Kadza", id: "name" },
-      { label: "Email", value: "carol@gmail.com", id: "email" },
-    ],
-  },
-]
+function getDisplayName(user: any): string {
+  if (user?.user_metadata?.full_name) return user.user_metadata.full_name
+  if (user?.user_metadata?.name) return user.user_metadata.name
+  if (user?.email) {
+    const name = user.email.split("@")[0]
+    return name
+      .split(/[._-]/)
+      .map((p: string) => p.charAt(0).toUpperCase() + p.slice(1))
+      .join(" ")
+  }
+  return ""
+}
+
+function getBusinessName(user: any): string {
+  if (user?.user_metadata?.business_name) return user.user_metadata.business_name
+  if (user?.user_metadata?.company) return user.user_metadata.company
+  return ""
+}
 
 export default function SettingsPage() {
+  const { user } = useAuth()
+
+  const [fullName, setFullName] = useState(getDisplayName(user))
+  const [email] = useState(user?.email || "")
+  const [businessName, setBusinessName] = useState(getBusinessName(user))
+  const [location, setLocation] = useState(user?.user_metadata?.location || "")
+  const [businessType, setBusinessType] = useState(user?.user_metadata?.business_type || "")
+
+  const [profileSaving, setProfileSaving] = useState(false)
+  const [profileSaved, setProfileSaved] = useState(false)
+  const [bizSaving, setBizSaving] = useState(false)
+  const [bizSaved, setBizSaved] = useState(false)
+
+  const [notifications, setNotifications] = useState({
+    expiry: true,
+    surplus: true,
+    lowStock: true,
+    weeklyReports: false,
+  })
+
+  const handleSaveAccount = async () => {
+    setProfileSaving(true)
+    setProfileSaved(false)
+    try {
+      await supabase.auth.updateUser({
+        data: {
+          full_name: fullName,
+          name: fullName,
+        },
+      })
+      setProfileSaved(true)
+      setTimeout(() => setProfileSaved(false), 3000)
+    } catch (err) {
+      console.error("Failed to save account:", err)
+    } finally {
+      setProfileSaving(false)
+    }
+  }
+
+  const handleSaveBusiness = async () => {
+    setBizSaving(true)
+    setBizSaved(false)
+    try {
+      await supabase.auth.updateUser({
+        data: {
+          business_name: businessName,
+          location,
+          business_type: businessType,
+        },
+      })
+      setBizSaved(true)
+      setTimeout(() => setBizSaved(false), 3000)
+    } catch (err) {
+      console.error("Failed to save business:", err)
+    } finally {
+      setBizSaving(false)
+    }
+  }
+
   return (
     <div className="flex flex-col gap-6 max-w-3xl">
       <div>
@@ -43,35 +425,105 @@ export default function SettingsPage() {
         <p className="text-sm text-muted-foreground">Manage your account and business preferences</p>
       </div>
 
-      {settingSections.map((section) => {
-        const Icon = section.icon
-        return (
-          <Card key={section.title}>
-            <CardHeader className="pb-4">
-              <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
-                  <Icon className="h-4 w-4 text-primary" />
-                </div>
-                <div>
-                  <CardTitle className="text-base font-semibold">{section.title}</CardTitle>
-                  <CardDescription>{section.description}</CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-4">
-              {section.fields.map((field) => (
-                <div key={field.id} className="flex flex-col gap-2">
-                  <Label htmlFor={field.id}>{field.label}</Label>
-                  <Input id={field.id} defaultValue={field.value} />
-                </div>
-              ))}
-              <div className="flex justify-end pt-2">
-                <Button size="sm">Save changes</Button>
-              </div>
-            </CardContent>
-          </Card>
-        )
-      })}
+      {/* Account */}
+      <Card>
+        <CardHeader className="pb-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
+              <User className="h-4 w-4 text-primary" />
+            </div>
+            <div>
+              <CardTitle className="text-base font-semibold">Account</CardTitle>
+              <CardDescription>Your personal account details</CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4">
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="full-name">Full name</Label>
+            <Input
+              id="full-name"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              placeholder="Enter your full name"
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              value={email}
+              disabled
+              className="opacity-60 cursor-not-allowed"
+            />
+            <p className="text-xs text-muted-foreground">Email cannot be changed here.</p>
+          </div>
+          <div className="flex items-center justify-end gap-3 pt-2">
+            {profileSaved && (
+              <span className="flex items-center gap-1.5 text-xs text-primary font-medium">
+                <CheckCircle2 className="h-3.5 w-3.5" /> Saved
+              </span>
+            )}
+            <Button size="sm" onClick={handleSaveAccount} disabled={profileSaving}>
+              {profileSaving ? "Saving..." : "Save changes"}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Business Profile */}
+      <Card>
+        <CardHeader className="pb-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
+              <Store className="h-4 w-4 text-primary" />
+            </div>
+            <div>
+              <CardTitle className="text-base font-semibold">Business Profile</CardTitle>
+              <CardDescription>Manage your business information</CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4">
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="biz-name">Business name</Label>
+            <Input
+              id="biz-name"
+              value={businessName}
+              onChange={(e) => setBusinessName(e.target.value)}
+              placeholder="Enter your business name"
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="location">Location</Label>
+            <Input
+              id="location"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              placeholder="City, Country"
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="biz-type">Business type</Label>
+            <Input
+              id="biz-type"
+              value={businessType}
+              onChange={(e) => setBusinessType(e.target.value)}
+              placeholder="e.g. Bakery, Restaurant, Grocery"
+            />
+          </div>
+          <div className="flex items-center justify-end gap-3 pt-2">
+            {bizSaved && (
+              <span className="flex items-center gap-1.5 text-xs text-primary font-medium">
+                <CheckCircle2 className="h-3.5 w-3.5" /> Saved
+              </span>
+            )}
+            <Button size="sm" onClick={handleSaveBusiness} disabled={bizSaving}>
+              {bizSaving ? "Saving..." : "Save changes"}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Notifications */}
       <Card>
@@ -88,26 +540,45 @@ export default function SettingsPage() {
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
           {[
-            { label: "Expiry alerts", desc: "Get notified before products expire", enabled: true },
-            { label: "Surplus predictions", desc: "AI-powered surplus warnings", enabled: true },
-            { label: "Low stock alerts", desc: "When inventory falls below threshold", enabled: true },
-            { label: "Weekly reports", desc: "Summary email every Monday", enabled: false },
+            {
+              key: "expiry" as const,
+              label: "Expiry alerts",
+              desc: "Get notified before products expire",
+            },
+            {
+              key: "surplus" as const,
+              label: "Surplus predictions",
+              desc: "AI-powered surplus warnings",
+            },
+            {
+              key: "lowStock" as const,
+              label: "Low stock alerts",
+              desc: "When inventory falls below threshold",
+            },
+            {
+              key: "weeklyReports" as const,
+              label: "Weekly reports",
+              desc: "Summary email every Monday",
+            },
           ].map((item) => (
-            <div key={item.label} className="flex items-center justify-between rounded-lg border border-border p-3.5">
+            <div key={item.key} className="flex items-center justify-between rounded-lg border border-border p-3.5">
               <div>
                 <p className="text-sm font-medium text-foreground">{item.label}</p>
                 <p className="text-xs text-muted-foreground">{item.desc}</p>
               </div>
-              <Badge variant={item.enabled ? "default" : "secondary"} className="text-[10px]">
-                {item.enabled ? "Active" : "Off"}
-              </Badge>
+              <Switch
+                checked={notifications[item.key]}
+                onCheckedChange={(val) =>
+                  setNotifications((prev) => ({ ...prev, [item.key]: val }))
+                }
+              />
             </div>
           ))}
         </CardContent>
       </Card>
 
-      {/* Plan */}
-      <Card>
+      
+      {/* <Card>
         <CardHeader className="pb-4">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
@@ -131,7 +602,7 @@ export default function SettingsPage() {
             <Button size="sm">Upgrade</Button>
           </div>
         </CardContent>
-      </Card>
+      </Card> */}
     </div>
   )
 }
