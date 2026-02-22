@@ -1,0 +1,29 @@
+{
+  "development": {
+    "username": "root",
+    "password": null,
+    "database": "ecotrack_db",
+    "host": "127.0.0.1",
+    "dialect": "mysql",
+    "logging": false,
+    "timezone": "+00:00"
+  },
+  "test": {
+    "username": "root",
+    "password": null,
+    "database": "ecotrack_db",
+    "host": "127.0.0.1",
+    "dialect": "mysql",
+    "logging": false,
+    "timezone": "+00:00"
+  },
+  "production": {
+    "username": "root",
+    "password": null,
+    "database": "ecotrack_db",
+    "host": "127.0.0.1",
+    "dialect": "mysql",
+    "logging": false,
+    "timezone": "+00:00"
+  }
+}
