@@ -87,8 +87,9 @@ module.exports = (sequelize, DataTypes) => {
     tableName: 'alerts',
     underscored: true,
     timestamps: true,
+    // These mappings ensure JS 'createdAt' looks at SQL 'created_at'
     createdAt: 'created_at',
-    updatedAt: 'updated_at'
+    updatedAt: 'updated_at' 
   });
   
   return Alert;
