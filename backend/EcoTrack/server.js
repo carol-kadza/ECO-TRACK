@@ -3,6 +3,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
+const settingsRoutes = require('./src/routes/settings')
 
 // Import the db object which contains our initialized sequelize instance
 const db = require('./src/models');
@@ -54,6 +55,7 @@ app.use('/api/forecasts', require('./src/routes/forecasts'));
 app.use('/api/alerts', require('./src/routes/alerts'));
 app.use('/api/dashboard', require('./src/routes/dashboard'));
 app.use('/api/2fa', twoFactorAuthRoutes);
+app.use('/api/settings', settingsRoutes);
 
 // 404 Handler
 app.use((req, res) => {
