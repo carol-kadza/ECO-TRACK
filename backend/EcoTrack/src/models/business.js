@@ -39,7 +39,7 @@ module.exports = (sequelize, DataTypes) => {
       }
     },
     type: {
-      type: DataTypes.ENUM('grocery', 'food_processing'),
+      type: DataTypes.ENUM('grocery', 'restaurant', 'bakery', 'cafe', 'catering', 'other'),
       allowNull: false,
       defaultValue: 'grocery'
     },

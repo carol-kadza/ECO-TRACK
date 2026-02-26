@@ -2,12 +2,12 @@ const forecastService = require('../services/forecastService');
 const { Forecast, Product } = require('../models');
 const { Op } = require('sequelize');
 
-// Generate forecast for a product
+// Generate forecast for a product (default 7 days)
 exports.generateForecast = async (req, res) => {
   try {
     const { product_id } = req.params;
     
-    const forecast = await forecastService.generateForecast(product_id, req.user.business_id);
+    const forecast = await forecastService.generateForecast(product_id, req.user.business_id, 7);
     
     // Save to database
     await forecastService.saveForecast(product_id, req.user.business_id, forecast);
@@ -18,11 +18,75 @@ exports.generateForecast = async (req, res) => {
     res.json({
       product_id,
       product_name: product.name,
+      period: 'weekly',
+      days: 7,
       ...forecast
     });
   } catch (error) {
     console.error('Generate forecast error:', error);
     res.status(500).json({ error: 'Failed to generate forecast', details: error.message });
+  }
+};
+
+// Get weekly forecast (7 days)
+exports.getWeeklyForecast = async (req, res) => {
+  try {
+    const { product_id } = req.params;
+    
+    const forecast = await forecastService.generateForecast(
+      product_id, 
+      req.user.business_id,
+      7
+    );
+    
+    await forecastService.saveForecast(product_id, req.user.business_id, forecast);
+    
+    const product = await Product.findByPk(product_id);
+    
+    res.json({
+      period: 'weekly',
+      days: 7,
+      product_id,
+      product_name: product?.name,
+      ...forecast
+    });
+  } catch (error) {
+    console.error('Weekly forecast error:', error);
+    res.status(500).json({ 
+      error: 'Failed to generate weekly forecast', 
+      details: error.message 
+    });
+  }
+};
+
+// Get monthly forecast (30 days)
+exports.getMonthlyForecast = async (req, res) => {
+  try {
+    const { product_id } = req.params;
+    
+    const forecast = await forecastService.generateForecast(
+      product_id, 
+      req.user.business_id,
+      30
+    );
+    
+    await forecastService.saveForecast(product_id, req.user.business_id, forecast);
+    
+    const product = await Product.findByPk(product_id);
+    
+    res.json({
+      period: 'monthly',
+      days: 30,
+      product_id,
+      product_name: product?.name,
+      ...forecast
+    });
+  } catch (error) {
+    console.error('Monthly forecast error:', error);
+    res.status(500).json({ 
+      error: 'Failed to generate monthly forecast', 
+      details: error.message 
+    });
   }
 };
 
@@ -94,7 +158,6 @@ exports.generateWasteForecast = async (req, res) => {
       return res.status(400).json(wasteForecast);
     }
     
-    // Get product details
     const product = await Product.findByPk(product_id);
     
     res.json({
@@ -124,7 +187,6 @@ exports.generateStockRecommendation = async (req, res) => {
       return res.status(400).json(recommendation);
     }
     
-    // Get product details
     const product = await Product.findByPk(product_id);
     
     res.json({

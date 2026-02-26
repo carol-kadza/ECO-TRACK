@@ -1,11 +1,11 @@
-const { Sequelize } = require('sequelize');
+
 require('dotenv').config();
 
-const sequelize = new Sequelize(
-  process.env.DB_NAME || 'ecotrack_db',
-  process.env.DB_USER || 'root',
-  process.env.DB_PASSWORD || '',
-  {
+module.exports = {
+  development: {
+    username: process.env.DB_USER || 'root',
+    password: process.env.DB_PASSWORD || '',
+    database: process.env.DB_NAME || 'ecotrack_db',
     host: process.env.DB_HOST || 'localhost',
     port: process.env.DB_PORT || 3306,
     dialect: 'mysql',
@@ -16,11 +16,21 @@ const sequelize = new Sequelize(
       acquire: 30000,
       idle: 10000
     }
+  },
+  test: {
+    username: process.env.DB_USER || 'root',
+    password: process.env.DB_PASSWORD || '',
+    database: process.env.DB_NAME || 'ecotrack_test_db',
+    host: process.env.DB_HOST || 'localhost',
+    port: process.env.DB_PORT || 3306,
+    dialect: 'mysql'
+  },
+  production: {
+    username: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT || 3306,
+    dialect: 'mysql'
   }
-);
-
-sequelize.authenticate()
-  .then(() => console.log(' MySQL database connection established successfully'))
-  .catch(err => console.error(' Unable to connect to MySQL database:', err));
-
-module.exports = sequelize;
+};

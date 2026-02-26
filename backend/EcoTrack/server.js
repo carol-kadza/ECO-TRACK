@@ -3,30 +3,32 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
-const sequelize = require('./src/config/database');
+
+// Import the db object which contains our initialized sequelize instance
+const db = require('./src/models');
+const sequelize = db.sequelize; 
+
 const twoFactorAuthRoutes = require('./src/routes/twoFactorAuth');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-
+// Middleware
 app.use(cors({
-  origin: 'http://localhost:3000', 
+  origin: '*', 
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
 
-
-const db = require('./src/models');
+// Attach models to app for easy access in controllers if needed
 app.set('models', db);
 
-
+// Root Routes
 app.get('/', (req, res) => {
   res.json({
     message: 'Ecotrack API',
@@ -44,7 +46,7 @@ app.get('/health', (req, res) => {
   });
 });
 
-
+// API Routes
 app.use('/api/auth', require('./src/routes/auth'));
 app.use('/api/products', require('./src/routes/products'));
 app.use('/api/inventory', require('./src/routes/inventory'));
@@ -53,7 +55,7 @@ app.use('/api/alerts', require('./src/routes/alerts'));
 app.use('/api/dashboard', require('./src/routes/dashboard'));
 app.use('/api/2fa', twoFactorAuthRoutes);
 
-
+// 404 Handler
 app.use((req, res) => {
   res.status(404).json({
     error: 'Route not found',
@@ -61,7 +63,7 @@ app.use((req, res) => {
   });
 });
 
-
+// Global Error Handler
 app.use((err, req, res, next) => {
   console.error('Error:', err);
   res.status(err.status || 500).json({
@@ -72,9 +74,10 @@ app.use((err, req, res, next) => {
   });
 });
 
-
+// Start Server and Authenticate Database
 app.listen(PORT, async () => {
   try {
+    // Now calling authenticate on the correct instance
     await sequelize.authenticate();
     console.log(' Database connected successfully');
   } catch (error) {

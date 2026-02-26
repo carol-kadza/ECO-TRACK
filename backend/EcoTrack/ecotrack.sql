@@ -17,3 +17,9 @@ SELECT id, name, business_id FROM products;
 SHOW CREATE TABLE inventorytransactions;
 DESCRIBE inventorytransactions;
 SHOW COLUMNS FROM inventorytransactions LIKE 'transaction_type';
+ALTER TABLE businesses 
+MODIFY COLUMN type ENUM('grocery', 'restaurant', 'bakery', 'cafe', 'catering', 'other') DEFAULT 'grocery';
+SELECT id, name, type FROM businesses WHERE type = 'food_processing';
+
+
+UPDATE businesses SET type = 'other' WHERE type = 'food_processing';
